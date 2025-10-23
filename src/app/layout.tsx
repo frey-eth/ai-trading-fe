@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import "react-tooltip/dist/react-tooltip.css";
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
@@ -19,11 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${ibmPlexMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body className={`${ibmPlexMono.variable} antialiased`}>{children}</body>
     </html>
   );
 }

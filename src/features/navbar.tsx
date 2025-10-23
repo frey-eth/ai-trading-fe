@@ -10,7 +10,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-1">
               <Image src={logo} alt="Alpha Arena" className="alpha-logo md:h-12 h-8 w-auto md:ml-0 -ml-2 cursor-pointer" />
-              <h1 className="text-lg font-semibold font-mono">AITriadTrade</h1>
+              <h1 className="text-lg font-semibold font-mono">VibeAgent</h1>
             </Link></div>
           <div className="hidden items-center space-x-6 md:flex md:absolute md:left-1/2 md:-translate-x-1/2">
 
