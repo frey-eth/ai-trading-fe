@@ -3,7 +3,7 @@ import { useState, useLayoutEffect, useRef } from "react";
 import { Group } from "@visx/group";
 import { GridRows, GridColumns } from "@visx/grid";
 import { scaleLinear, scaleTime } from "@visx/scale";
-import { AxisBottom, AxisLeft } from "@visx/axis";
+import { AxisBottom, AxisLeft, TickFormatter } from "@visx/axis";
 import { line, LinePath } from "@visx/shape";
 import gpt from "@assets/logos/GPT_logo.png";
 import gptWhite from "@assets/logos_white/GPT_logo.png";
@@ -19,42 +19,26 @@ import qwen from "@assets/logos/qwen_logo.png";
 import qwenWhite from "@assets/logos_white/qwen_logo.png";
 import btc from "@assets/logos_white/btc.png";
 import Image from "next/image";
-
-import { localPoint } from "@visx/event";
-import { useTooltip, useTooltipInPortal } from "@visx/tooltip";
+import { NumberValue } from "d3-scale";
 
 const AccountValueChart = () => {
   const [timeRange, setTimeRange] = useState("ALL");
   const [currency, setCurrency] = useState("$");
   const [dimensions, setDimensions] = useState({ width: 1455.2, height: 793 });
 
-  const {
-    tooltipData,
-    tooltipLeft,
-    tooltipTop,
-    tooltipOpen,
-    showTooltip,
-    hideTooltip,
-  } = useTooltip();
-
-  const { containerRef: tooltipContainerRef, TooltipInPortal } =
-    useTooltipInPortal({
-      scroll: true,
-    });
-
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLInputElement>(null);
   const linesGroupRef = useRef<SVGGElement | null>(null);
 
   // Use useLayoutEffect to compute width dynamically based on container size
   useLayoutEffect(() => {
     if (!containerRef.current) return;
 
-    let timeoutId: any = null;
+    let timeoutId: NodeJS.Timeout | null = null;
 
     const updateDimensions = () => {
-      const container = containerRef.current;
+      const container = containerRef?.current;
       if (container) {
-        const { width: containerWidth } = container.getBoundingClientRect();
+        const { width: containerWidth } = container?.getBoundingClientRect();
         // Maintain aspect ratio or set specific height logic
         const newWidth = containerWidth;
         const newHeight = Math.min(793, containerWidth * 0.545); // Maintain approximate aspect ratio
@@ -193,8 +177,8 @@ const AccountValueChart = () => {
   // Scales
   const xScale = scaleTime({
     domain: [
-      Math.min(...data.map((d) => d.date as any)),
-      Math.max(...data.map((d) => d.date as any)),
+      Math.min(...data.map((d) => d.date.getTime())),
+      Math.max(...data.map((d) => d.date.getTime())),
     ],
     range: [0, innerWidth],
   });
@@ -207,18 +191,14 @@ const AccountValueChart = () => {
     range: [innerHeight, 0],
   });
 
-  const formatDate = (date: any) => {
-    const month = date.toLocaleString("en", { month: "short" });
-    const day = date.getDate();
-    const time = date.toLocaleString("en", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
+  const formatDate: TickFormatter<Date | NumberValue> = (value) =>
+    new Date(value.valueOf()).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     });
-    return `${month} ${day} ${time}`;
-  };
 
-  const formatCurrency = (value: any) => {
+  //eslint-disable-next-line
+  const formatCurrency: any = (value: number) => {
     return `$${value.toLocaleString("en-US")}`;
   };
 
@@ -254,8 +234,6 @@ const AccountValueChart = () => {
                     width={width}
                     height={height}
                     style={{ display: "block", maxWidth: "100%" }}
-                    ref={tooltipContainerRef}
-                    onMouseLeave={() => hideTooltip()}
                   >
                     <defs>
                       <pattern
